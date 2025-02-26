@@ -55,16 +55,10 @@ class MyNotifier extends ChangeNotifier {
   bool _cameraIsInitialized = false;
   bool get cameraIsInitialized => _cameraIsInitialized;
 
-  bool get showProcessedPreview => true;
+  bool get showProcessedPreview => false;
 
   Uint8List _imageData = Uint8List(0);
   Uint8List get imageData => _imageData;
-
-  Uint8List _staticImage = Uint8List(0);
-  Uint8List get staticImage => _staticImage;
-
-  Uint8List _imageData2 = Uint8List(0);
-  Uint8List get imageData2 => _imageData2;
 
   bool _captureStaticImage = false;
   bool _captureStaticImage2 = false;
@@ -72,33 +66,29 @@ class MyNotifier extends ChangeNotifier {
   FaceResult? _faceResult;
   FaceResult? get faceResult => _faceResult;
 
+  int _skipFrame = 2;
+  int _frameCount = 0;
+
   Future<void> _getImageData() async {
     await _cameraController.startImageStream((image) async {
-      if (_captureStaticImage) {
-        // imglib.Image convertedImg = _imageConverter.convert(
-        //   image: image,
-        //   width: image.width,
-        //   height: image.height,
-        // );
-
-        imglib.Image convertedImg = ImageUtils.convertCameraImage(image);
-        _staticImage = imglib.encodeJpg(convertedImg);
-        _captureStaticImage = false;
-        notifyListeners();
+      _frameCount++;
+      if (_frameCount % _skipFrame != 0) {
+        return;
       }
 
-      if (_captureStaticImage2) {
-        imglib.Image convertedImg = ImageUtils.convertCameraImage(image);
-        Uint8List byteData = imglib.encodeJpg(convertedImg);
-        cv.Mat mat = cv.imdecode(byteData, cv.IMREAD_COLOR);
+      if (_frameCount > 1000) {
+        _frameCount = 0;
+      }
 
-        mat = mat.rotate(cv.ROTATE_90_COUNTERCLOCKWISE);
+      imglib.Image convertedImg = ImageUtils.convertCameraImage(image);
+      Uint8List byteData = imglib.encodeJpg(convertedImg);
+      cv.Mat mat = cv.imdecode(byteData, cv.IMREAD_COLOR);
 
-        mat = cv.resize(mat, (320, 320));
-        _faceResult = detectFace(mat);
-        _imageData2 = byteData;
+      mat = mat.rotate(cv.ROTATE_90_COUNTERCLOCKWISE);
 
-        _captureStaticImage2 = false;
+      mat = cv.resize(mat, (320, 320));
+      _faceResult = detectFace(mat);
+      if (_faceResult != null) {
         notifyListeners();
       }
     });

@@ -31,8 +31,7 @@ class CameraApp extends StatelessWidget {
                       child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.memory(myNotifier.staticImage),
-                        Image.memory(myNotifier.imageData2),
+                        Image.memory(myNotifier.imageData),
                         MaterialButton(
                           onPressed: () {
                             myNotifier.getImage();
