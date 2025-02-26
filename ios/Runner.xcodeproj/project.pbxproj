@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0B28DC812D6ED17E008C6FB7 /* converter.c in Sources */ = {isa = PBXBuildFile; fileRef = 0B28DC802D6ED17E008C6FB7 /* converter.c */; };
 		0C63D46F09C83A7DFB82FAE7 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0FBDE83619D435D7DCFCB7F5 /* Pods_RunnerTests.framework */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
@@ -42,6 +43,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0B28DC802D6ED17E008C6FB7 /* converter.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = converter.c; sourceTree = "<group>"; };
+		0B28DC822D6ED183008C6FB7 /* converter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = converter.h; sourceTree = "<group>"; };
 		0FBDE83619D435D7DCFCB7F5 /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
@@ -114,7 +117,6 @@
 				7C08DDAD6CE21D4583934CDF /* Pods-RunnerTests.release.xcconfig */,
 				ABEACCDDF37682308D996727 /* Pods-RunnerTests.profile.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -138,6 +140,8 @@
 				331C8082294A63A400263BE5 /* RunnerTests */,
 				69E21274E63DA5FAB9F8318D /* Pods */,
 				64D7A6919B7B5F5FFEF09ED4 /* Frameworks */,
+				0B28DC802D6ED17E008C6FB7 /* converter.c */,
+				0B28DC822D6ED183008C6FB7 /* converter.h */,
 			);
 			sourceTree = "<group>";
 		};
@@ -377,6 +381,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0B28DC812D6ED17E008C6FB7 /* converter.c in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 			);

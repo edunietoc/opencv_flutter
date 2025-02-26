@@ -2,12 +2,14 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:opencv_dart/opencv_dart.dart' as cv;
+import 'conver/func.dart';
+
+import 'package:image/image.dart' as imglib;
 
 import 'models/face_result.dart';
 
 class MyNotifier extends ChangeNotifier {
   MyNotifier() {
-    print('init only once');
     initState();
   }
 
@@ -53,32 +55,52 @@ class MyNotifier extends ChangeNotifier {
   bool _cameraIsInitialized = false;
   bool get cameraIsInitialized => _cameraIsInitialized;
 
-  bool get showProcessedPreview => false;
+  bool get showProcessedPreview => true;
 
   Uint8List _imageData = Uint8List(0);
   Uint8List get imageData => _imageData;
+
+  Uint8List _staticImage = Uint8List(0);
+  Uint8List get staticImage => _staticImage;
+
+  Uint8List _imageData2 = Uint8List(0);
+  Uint8List get imageData2 => _imageData2;
+
+  bool _captureStaticImage = false;
+  bool _captureStaticImage2 = false;
 
   FaceResult? _faceResult;
   FaceResult? get faceResult => _faceResult;
 
   Future<void> _getImageData() async {
     await _cameraController.startImageStream((image) async {
-      print(image.format.group.name);
-      cv.Mat mat = await convertCameraImageToMat(image);
+      if (_captureStaticImage) {
+        // imglib.Image convertedImg = _imageConverter.convert(
+        //   image: image,
+        //   width: image.width,
+        //   height: image.height,
+        // );
 
-      mat = cv.rotate(mat, cv.ROTATE_90_COUNTERCLOCKWISE);
-      mat = cv.resize(mat, (320, 320));
-
-      if (mat.data.isEmpty) {
-        print('nothing');
-        return;
+        imglib.Image convertedImg = ImageUtils.convertCameraImage(image);
+        _staticImage = imglib.encodeJpg(convertedImg);
+        _captureStaticImage = false;
+        notifyListeners();
       }
 
-      // _faceResult = detectFace(mat);
-      Future.delayed(Duration(milliseconds: 500), () {
-        _imageData = cv.imencode('.jpg', mat).$2;
+      if (_captureStaticImage2) {
+        imglib.Image convertedImg = ImageUtils.convertCameraImage(image);
+        Uint8List byteData = imglib.encodeJpg(convertedImg);
+        cv.Mat mat = cv.imdecode(byteData, cv.IMREAD_COLOR);
+
+        mat = mat.rotate(cv.ROTATE_90_COUNTERCLOCKWISE);
+
+        mat = cv.resize(mat, (320, 320));
+        _faceResult = detectFace(mat);
+        _imageData2 = byteData;
+
+        _captureStaticImage2 = false;
         notifyListeners();
-      });
+      }
     });
   }
 
@@ -86,6 +108,16 @@ class MyNotifier extends ChangeNotifier {
     if (mat.cols > 0) {
       print('score: ${mat.atPixel(0, 14)}');
     }
+  }
+
+  void getImage() {
+    _captureStaticImage = true;
+    notifyListeners();
+  }
+
+  void getImage2() {
+    _captureStaticImage2 = true;
+    notifyListeners();
   }
 
   FaceResult? detectFace(cv.Mat mat) {
@@ -97,7 +129,7 @@ class MyNotifier extends ChangeNotifier {
       "onnx",
       _modelBuffer,
       Uint8List(0),
-      (320, 320),
+      (mat.width, mat.height), //320, 320
     );
 
     cv.Mat? result = faceDetectorYN?.detect(mat);
@@ -108,59 +140,6 @@ class MyNotifier extends ChangeNotifier {
 
     FaceResult? resultModel = FaceResult.getModel(result);
     return resultModel;
-  }
-
-  Future<cv.Mat> convertCameraImageToMat(CameraImage cameraImage) async {
-    if (cameraImage.format.group == ImageFormatGroup.yuv420) {
-      try {
-        // Assuming cameraImage.planes[0] is Y, planes[1] is U, and planes[2] is V.
-        Uint8List yBytes = cameraImage.planes[0].bytes;
-        Uint8List uBytes = cameraImage.planes[1].bytes;
-        Uint8List vBytes = cameraImage.planes[2].bytes;
-
-        int width = cameraImage.width;
-        int height = cameraImage.height;
-
-        cv.Mat yMat =
-            cv.Mat.fromList(height, width, cv.MatType.CV_8UC1, yBytes);
-        cv.Mat uMat = cv.Mat.fromList(
-            height ~/ 2, width ~/ 2, cv.MatType.CV_8UC1, uBytes);
-        cv.Mat vMat = cv.Mat.fromList(
-            height ~/ 2, width ~/ 2, cv.MatType.CV_8UC1, vBytes);
-
-        // Resize U and V to match Y's dimensions.
-        uMat = cv.resize(uMat, (width, height), interpolation: cv.INTER_LINEAR);
-        vMat = cv.resize(vMat, (width, height), interpolation: cv.INTER_LINEAR);
-
-        // Create a multi-channel YUV Mat using merge.
-        cv.Mat yuvMat = cv.Mat.create(
-            rows: height,
-            cols: width,
-            type: cv.MatType.CV_8UC3); // Corrected line
-
-        cv.merge(cv.VecMat.fromList([yMat, uMat, vMat]), dst: yuvMat);
-
-        // Convert YUV to BGR.
-        cv.Mat bgrMat = cv.Mat.create(
-            rows: height,
-            cols: width,
-            type: cv.MatType.CV_8UC3); // Corrected line
-
-        cv.cvtColor(
-          yuvMat,
-          cv.COLOR_YUV2RGB,
-          dst: bgrMat,
-        );
-
-        return bgrMat;
-      } catch (e) {
-        print('Error converting YUV to Mat: $e');
-        rethrow;
-      }
-    } else {
-      print('Image format is not YUV420');
-      throw Exception('Image format is not YUV420');
-    }
   }
 
   @override

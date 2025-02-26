@@ -1,0 +1,7 @@
+Executable : /Users/eduardonieto/Library/Android/sdk/cmake/3.18.1/bin/ninja
+arguments : 
+-C
+/Users/eduardonieto/Workspace/pruebas/opencv_flutter/android/app/.cxx/Debug/1l6r4l1c/x86_64
+convertImage
+jvmArgs : 
+

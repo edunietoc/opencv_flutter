@@ -27,7 +27,26 @@ class CameraApp extends StatelessWidget {
 
           return myNotifier.cameraIsInitialized
               ? myNotifier.showProcessedPreview
-                  ? Center(child: Image.memory(myNotifier.imageData))
+                  ? Center(
+                      child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.memory(myNotifier.staticImage),
+                        Image.memory(myNotifier.imageData2),
+                        MaterialButton(
+                          onPressed: () {
+                            myNotifier.getImage();
+                          },
+                          child: Text('get image'),
+                        ),
+                        MaterialButton(
+                          onPressed: () {
+                            myNotifier.getImage2();
+                          },
+                          child: Text('get image2'),
+                        )
+                      ],
+                    ))
                   : Stack(
                       children: [
                         CameraPreview(myNotifier.cameraController),
