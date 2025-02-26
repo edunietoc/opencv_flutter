@@ -1,4 +1,4 @@
-import 'package:opencv_dart/opencv.dart';
+import 'package:opencv_dart/opencv_dart.dart';
 
 class FaceResult {
   FaceResult._({

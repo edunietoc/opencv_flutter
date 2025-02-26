@@ -1,13 +1,9 @@
-import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:opencv_dart/opencv.dart';
 import 'package:opencv_dart/opencv_dart.dart' as cv;
-import 'package:opencv_test/models/face_result.dart';
-import 'package:path_provider/path_provider.dart';
+
+import 'models/face_result.dart';
 
 class MyNotifier extends ChangeNotifier {
   MyNotifier() {
@@ -26,10 +22,10 @@ class MyNotifier extends ChangeNotifier {
   }
 
   Future<void> _getModelFromAssets() async {
-    final _model =
+    final model =
         await rootBundle.load('assets/face_detection_yunet_2023mar.onnx');
 
-    _modelBuffer = _model.buffer.asUint8List();
+    _modelBuffer = model.buffer.asUint8List();
     _modelLoaded = true;
     notifyListeners();
   }
@@ -46,7 +42,7 @@ class MyNotifier extends ChangeNotifier {
       _cameras.firstWhere(
           (camera) => camera.lensDirection == CameraLensDirection.front),
       ResolutionPreset.low,
-      imageFormatGroup: ImageFormatGroup.jpeg,
+      // imageFormatGroup: ImageFormatGroup.jpeg,
     );
 
     await _cameraController.initialize();
@@ -67,7 +63,9 @@ class MyNotifier extends ChangeNotifier {
 
   Future<void> _getImageData() async {
     await _cameraController.startImageStream((image) async {
-      Mat mat = await convertCameraImageToMat(image);
+      print(image.format.group.name);
+      cv.Mat mat = await convertCameraImageToMat(image);
+
       mat = cv.rotate(mat, cv.ROTATE_90_COUNTERCLOCKWISE);
       mat = cv.resize(mat, (320, 320));
 
@@ -76,10 +74,11 @@ class MyNotifier extends ChangeNotifier {
         return;
       }
 
-      _faceResult = detectFace(mat);
-      // _imageData = imencode('.jpeg', mat).$2;
-
-      notifyListeners();
+      // _faceResult = detectFace(mat);
+      Future.delayed(Duration(milliseconds: 500), () {
+        _imageData = cv.imencode('.jpg', mat).$2;
+        notifyListeners();
+      });
     });
   }
 
@@ -89,7 +88,7 @@ class MyNotifier extends ChangeNotifier {
     }
   }
 
-  FaceResult? detectFace(Mat mat) {
+  FaceResult? detectFace(cv.Mat mat) {
     if (!_modelLoaded) {
       print('MODEL NOT READY!!!!!');
       return null;
@@ -101,7 +100,8 @@ class MyNotifier extends ChangeNotifier {
       (320, 320),
     );
 
-    Mat? result = faceDetectorYN?.detect(mat);
+    cv.Mat? result = faceDetectorYN?.detect(mat);
+    print('mat_result: ${result?.toFmtString()}');
     if (result == null) {
       return null;
     }
@@ -138,7 +138,7 @@ class MyNotifier extends ChangeNotifier {
             cols: width,
             type: cv.MatType.CV_8UC3); // Corrected line
 
-        cv.merge(VecMat.fromList([yMat, uMat, vMat]), dst: yuvMat);
+        cv.merge(cv.VecMat.fromList([yMat, uMat, vMat]), dst: yuvMat);
 
         // Convert YUV to BGR.
         cv.Mat bgrMat = cv.Mat.create(
