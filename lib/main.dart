@@ -26,78 +26,36 @@ class CameraApp extends StatelessWidget {
           MyNotifier myNotifier = ref.watch(myNotifierProvider);
 
           return myNotifier.cameraIsInitialized
-              ? myNotifier.showProcessedPreview
-                  ? Center(
+              ? Stack(
+                  children: [
+                    CameraPreview(myNotifier.cameraController),
+                    Align(
+                      alignment: Alignment.bottomLeft,
                       child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.memory(myNotifier.imageData),
-                        MaterialButton(
-                          onPressed: () {
-                            myNotifier.getImage();
-                          },
-                          child: Text('get image'),
-                        ),
-                        MaterialButton(
-                          onPressed: () {
-                            myNotifier.getImage2();
-                          },
-                          child: Text('get image2'),
-                        )
-                      ],
-                    ))
-                  : Stack(
-                      children: [
-                        CameraPreview(myNotifier.cameraController),
-                        if (myNotifier.faceResult != null)
-                          Positioned(
-                            left: myNotifier.faceResult?.bboxTopLeft.$1,
-                            top: myNotifier.faceResult?.bboxTopLeft.$2,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                border: Border.all(
-                                  color: Colors.greenAccent,
-                                  width: 2,
-                                ),
-                              ),
-                              width: myNotifier.faceResult?.bboxSize.$1,
-                              height: myNotifier.faceResult?.bboxSize.$2,
-                              child: Text(
-                                'score: ${myNotifier.faceResult?.faceScore.toStringAsFixed(3)}',
-                                style: const TextStyle(
-                                  color: Colors.greenAccent,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'right eye open prob: ${myNotifier.leftEyeOpenProbability.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              color: Colors.greenAccent,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                        Align(
-                          alignment: Alignment.bottomLeft,
-                          child: Column(
-                            children: [
-                              Text(
-                                'right eye closed: ${myNotifier.faceResult?.leftEye.toString()}',
-                                style: const TextStyle(
-                                  color: Colors.greenAccent,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              Text(
-                                'left eye closed: ${myNotifier.faceResult?.rightEye.toString()}',
-                                style: const TextStyle(
-                                  color: Colors.greenAccent,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            'left eye open prob: ${myNotifier.rightEyeOpenProbability.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              color: Colors.greenAccent,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        )
-                      ],
+                        ],
+                      ),
                     )
+                  ],
+                )
               : const Text('camera not init');
         }),
       ),
