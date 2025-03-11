@@ -51,6 +51,22 @@ class CameraApp extends StatelessWidget {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
+                          Text(
+                            'smiling prob: ${myNotifier.smilingProbability.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              color: Colors.greenAccent,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            'yAngle: ${myNotifier.yAngle.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              color: Colors.greenAccent,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ],
                       ),
                     )

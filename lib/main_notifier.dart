@@ -79,6 +79,8 @@ class MyNotifier extends ChangeNotifier {
 
   double leftEyeOpenProbability = 0.0;
   double rightEyeOpenProbability = 0.0;
+  double smilingProbability = 0.0;
+  double yAngle = 0.0;
 
   Future<void> _getImageData() async {
     await _cameraController.startImageStream((image) async {
@@ -90,11 +92,6 @@ class MyNotifier extends ChangeNotifier {
       if (_frameCount > 1000) {
         _frameCount = 0;
       }
-
-      imglib.Image convertedImg = ImageUtils.convertCameraImage(image);
-      Uint8List byteData = imglib.encodeJpg(convertedImg);
-
-      final format = InputImageFormatValue.fromRawValue(image.format.raw);
 
       final InputImage? inputImage = cameraImageToInputImage(
           image, _cameras[_indexCamera], _deviceOrientation);
@@ -112,10 +109,8 @@ class MyNotifier extends ChangeNotifier {
 
         leftEyeOpenProbability = face.leftEyeOpenProbability ?? -1;
         rightEyeOpenProbability = face.rightEyeOpenProbability ?? -1;
-
-        print('leftEyeOpenProbability: ${face.leftEyeOpenProbability}');
-        print('rightEyeOpenProbability: ${face.rightEyeOpenProbability}');
-        print(face.landmarks[FaceLandmarkType.leftEye]);
+        smilingProbability = face.smilingProbability ?? -1;
+        yAngle = face.headEulerAngleY ?? -1;
         notifyListeners();
       }
 
@@ -129,34 +124,6 @@ class MyNotifier extends ChangeNotifier {
         notifyListeners();
       } */
     });
-  }
-
-  void printMat(cv.Mat mat) {
-    if (mat.cols > 0) {
-      print('score: ${mat.atPixel(0, 14)}');
-    }
-  }
-
-  FaceResult? detectFace(cv.Mat mat) {
-    if (!_modelLoaded) {
-      print('MODEL NOT READY!!!!!');
-      return null;
-    }
-    faceDetectorYN ??= cv.FaceDetectorYN.fromBuffer(
-      "onnx",
-      _modelBuffer,
-      Uint8List(0),
-      (mat.width, mat.height), //320, 320
-    );
-
-    cv.Mat? result = faceDetectorYN?.detect(mat);
-    print('mat_result: ${result?.toFmtString()}');
-    if (result == null) {
-      return null;
-    }
-
-    FaceResult? resultModel = FaceResult.getModel(result);
-    return resultModel;
   }
 
   @override
